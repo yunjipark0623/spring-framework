@@ -1,205 +1,357 @@
 package kr.ac.jejunu.userdao;
 
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import javax.sql.DataSource;
 import java.sql.*;
 
 public class UserDao {//추상화된 함수를 가지고 있으니까 class도 추상화클래스가 되어야 한다.
     //private final ConnectionMaker connectionMaker = new JejuConnectionMaker();//new라는 거 자체가 dependency임 의존할 수 밖에 없음. 이 UserDao입장에서는 dependency를 가지고 싶지 않음 -> 어떻게 해야 할까? -> userDao를 호출하는 userdao한테 너가 dependency를 결정해서 나한테 넘겨줘 하는 거임 -> UserDaoTests에서 호출
 //    private final ConnectionMaker connectionMaker;
-    private final DataSource dataSource;
-
-    public UserDao(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public User get(Long id) throws SQLException, ClassNotFoundException {//User의 객체와 같은 데이터타입을 return해줘야 함, 함수명은 get이고 파라미터로 long데이터 타입의 id를 받음
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        User user = null;
-
-        try {
-            connection = dataSource.getConnection();
-
-            preparedStatement = connection.prepareStatement("select * from userinfo where id = ?");
-            preparedStatement.setLong(1, id);
-
-            resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                user = new User();
-                user.setId(resultSet.getLong("id"));
-                user.setName(resultSet.getString("name"));
-                user.setPassword(resultSet.getString("password"));
-            }
-        }   finally {
-            if(resultSet != null) {
-                try {
-                    resultSet.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(connection != null) {
-                try {
-                    connection.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        //어떤 이유인지는 모르겠지만 exception이 발생해서 서버가 죽는다고 하자
-//        Connection connection = dataSource.getConnection();
+//    private final DataSource dataSource;
 //
-//        PreparedStatement preparedStatement =
-//                connection.prepareStatement("select * from userinfo where id = ?");//userinfo테이블에서 id를 다 가지고 온다.
-//        preparedStatement.setLong(1, id);
+//    public UserDao(DataSource dataSource) {
+//        this.dataSource = dataSource;
+//    }
 //
-//        ResultSet resultSet = preparedStatement.executeQuery();
+//    public User get(Long id) throws SQLException, ClassNotFoundException {//User의 객체와 같은 데이터타입을 return해줘야 함, 함수명은 get이고 파라미터로 long데이터 타입의 id를 받음
+//        Connection connection = null;
+//        PreparedStatement preparedStatement = null;
+//        ResultSet resultSet = null;
+//        User user = null;
 //
-//        resultSet.next();
-//        User user = new User();
-//        user.setId(resultSet.getLong("id"));
-//        user.setName(resultSet.getString("name"));
-//        user.setPassword(resultSet.getString("password"));
+//        try {
+//            connection = dataSource.getConnection();
 //
-//        resultSet.close();//자원해제
-//        preparedStatement.close();
-//        connection.close();
+//            preparedStatement = connection.prepareStatement("select * from userinfo where id = ?");
+//            preparedStatement.setLong(1, id);
+//
+//            resultSet = preparedStatement.executeQuery();
+//
+//            if (resultSet.next()) {
+//                user = new User();
+//                user.setId(resultSet.getLong("id"));
+//                user.setName(resultSet.getString("name"));
+//                user.setPassword(resultSet.getString("password"));
+//            }
+//        }   finally {
+//            if(resultSet != null) {
+//                try {
+//                    resultSet.close();
+//                }
+//                catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            if(preparedStatement != null) {
+//                try {
+//                    preparedStatement.close();
+//                }
+//                catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            if(connection != null) {
+//                try {
+//                    connection.close();
+//                }
+//                catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+//        //어떤 이유인지는 모르겠지만 exception이 발생해서 서버가 죽는다고 하자
+////        Connection connection = dataSource.getConnection();
+////
+////        PreparedStatement preparedStatement =
+////                connection.prepareStatement("select * from userinfo where id = ?");//userinfo테이블에서 id를 다 가지고 온다.
+////        preparedStatement.setLong(1, id);
+////
+////        ResultSet resultSet = preparedStatement.executeQuery();
+////
+////        resultSet.next();
+////        User user = new User();
+////        user.setId(resultSet.getLong("id"));
+////        user.setName(resultSet.getString("name"));
+////        user.setPassword(resultSet.getString("password"));
+////
+////        resultSet.close();//자원해제
+////        preparedStatement.close();
+////        connection.close();
+//
+//        return user;
+//    }
+//
+////    public Long add(User user) throws SQLException, ClassNotFoundException {//long데이터 타입을 return하고 add라는 함수명을 가지고 User의 객체인 user를 파라미터로 받는다.
+////        Connection connection = null;
+////        PreparedStatement preparedStatement = null;//userinfo테이블에 name, password의 값이 들어오면 add한다.
+////        Long id = null;
+////        try {
+////            connection = dataSource.getConnection();
+////
+////            preparedStatement = connection.prepareStatement("insert into userinfo(name, password) values(?, ?)");
+////            preparedStatement.setString(1, user.getName());
+////            preparedStatement.setString(2, user.getPassword());
+////
+////            preparedStatement.executeUpdate();
+////
+////            id = getLastInsertId(connection);
+////        } finally {
+////            if(preparedStatement != null) {
+////                try {
+////                    preparedStatement.close();
+////                }
+////                catch (SQLException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////            if(connection != null) {
+////                try {
+////                    connection.close();
+////                }
+////                catch (SQLException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////        }
+////
+////        return id;
+////    }
+//
+//    public Long add(User user) throws ClassNotFoundException, SQLException {
+//        Connection connection = null;
+//        PreparedStatement preparedStatement = null;
+//        Long id = null;
+//        try {
+//            connection = dataSource.getConnection();
+//
+//            StatementStrategy statementStrategy = new AddStatementStrategy();
+//            preparedStatement = statementStrategy.makePrepareStatement(user, connection);
+//
+//            preparedStatement.executeUpdate();
+//
+//            id = getLastInsertId(connection);
+//        } finally {
+//            if (preparedStatement != null)
+//                try {
+//                    preparedStatement.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            if (connection != null)
+//                try {
+//                    connection.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//        }
+//
+//        return id;
+//    }
+//
+////    public void update(User user) throws SQLException {
+////        Connection connection = null;
+////        PreparedStatement preparedStatement = null;//userinfo테이블에 name, password의 값이 들어오면 add한다.
+////
+////        try {
+////            connection = dataSource.getConnection();
+////
+////            preparedStatement = connection.prepareStatement("update userinfo set name = ?, password = ? where id = ?");
+////            preparedStatement.setString(1, user.getName());
+////            preparedStatement.setString(2, user.getPassword());
+////            preparedStatement.setLong(3, user.getId());
+////
+////            preparedStatement.executeUpdate();
+////        } finally {
+////            if(preparedStatement != null) {
+////                try {
+////                    preparedStatement.close();
+////                }
+////                catch (SQLException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////            if(connection != null) {
+////                try {
+////                    connection.close();
+////                }
+////                catch (SQLException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////        }
+////    }
+//
+//
+//    public void update(User user) throws SQLException {
+//        Connection connection = null;
+//        PreparedStatement preparedStatement = null;
+//        try {
+//            connection = dataSource.getConnection();
+//
+//            StatementStrategy statementStrategy = new UpdateStatementStrategy();
+//            preparedStatement = statementStrategy.makePrepareStatement(user, connection);
+//
+//            preparedStatement.executeUpdate();
+//        } finally {
+//            if (preparedStatement != null)
+//                try {
+//                    preparedStatement.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            if (connection != null)
+//                try {
+//                    connection.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//        }
+//    }
+//
+////    public void delete(Long id) throws SQLException {
+////        Connection connection = null;
+////        PreparedStatement preparedStatement = null;//userinfo테이블에 name, password의 값이 들어오면 add한다.
+////
+////        try {
+////            connection = dataSource.getConnection();
+////
+////            preparedStatement = connection.prepareStatement("delete from userinfo where id = ? ");
+////            preparedStatement.setLong(1, id );
+////
+////            preparedStatement.executeUpdate();
+////        } finally {
+////            if(preparedStatement != null) {
+////                try {
+////                    preparedStatement.close();
+////                }
+////                catch (SQLException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////            if(connection != null) {
+////                try {
+////                    connection.close();
+////                }
+////                catch (SQLException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////        }
+////    }
+//
+//    public void delete(Long id) throws SQLException {
+//        Connection connection = null;
+//        PreparedStatement preparedStatement = null;
+//        try {
+//            connection = dataSource.getConnection();
+//            StatementStrategy statementStrategy = new DeleteStatementStrategy();
+//            preparedStatement = statementStrategy.makePrepareStatement(id, connection);
+//
+//            preparedStatement.executeUpdate();
+//        } finally {
+//            if (preparedStatement != null)
+//                try {
+//                    preparedStatement.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//            if (connection != null)
+//                try {
+//                    connection.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//        }
+//    }
+//
+////    public Long getLastInsertId(Connection connection) throws SQLException {
+////        ResultSet resultSet = null;
+////        Long id = null;
+////        try {
+////            PreparedStatement preparedStatement = connection.prepareStatement("select last_insert_id()");//가장 최근에 삽입된 id를 가지고 온다.
+////            resultSet = preparedStatement.executeQuery();
+////
+////            resultSet.next();
+////            id = resultSet.getLong(1);
+////        } finally {
+////            if(resultSet != null) {
+////                try {
+////                    resultSet.close();
+////                } catch (SQLException e) {
+////                    e.printStackTrace();
+////                }
+////            }
+////        }
+////        return id;
+////    }
+//
+//    public Long getLastInsertId(Connection connection) throws SQLException {
+//        ResultSet resultSet = null;
+//        Long id = null;
+//        try {
+//            PreparedStatement preparedStatement = connection.prepareStatement("select last_insert_id()");
+//            resultSet = preparedStatement.executeQuery();
+//
+//            resultSet.next();
+//            id = resultSet.getLong(1);
+//        } finally {
+//            if (resultSet != null)
+//                try {
+//                    resultSet.close();
+//                } catch (SQLException e) {
+//                    e.printStackTrace();
+//                }
+//
+//        }
+//
+//        return id;
+//    }
 
-        return user;
+    private final JejuJdbcTemplate jdbcTemplate;
+
+    public UserDao(JejuJdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Long add(User user) throws SQLException, ClassNotFoundException {//long데이터 타입을 return하고 add라는 함수명을 가지고 User의 객체인 user를 파라미터로 받는다.
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;//userinfo테이블에 name, password의 값이 들어오면 add한다.
-        Long id = null;
+
+    public User get(Long id) {
+        String sql = "select * from userinfo where id = ?";
+        Object[] params = new Object[]{id};
+        User result = null;
         try {
-            connection = dataSource.getConnection();
-
-            preparedStatement = connection.prepareStatement("insert into userinfo(name, password) values(?, ?)");
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
-
-            preparedStatement.executeUpdate();
-
-            id = getLastInsertId(connection);
-        } finally {
-            if(preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(connection != null) {
-                try {
-                    connection.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            result = jdbcTemplate.queryForObject(sql, params, (rs, rowNum) -> {
+                User user = new User();
+                user.setId(rs.getLong("id"));
+                user.setName(rs.getString("name"));
+                user.setPassword(rs.getString("password"));
+                return user;
+            });
+        } catch (EmptyResultDataAccessException e) {
         }
-
-        return id;
+        return result;
     }
 
-    public void update(User user) throws SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;//userinfo테이블에 name, password의 값이 들어오면 add한다.
 
-        try {
-            connection = dataSource.getConnection();
-
-            preparedStatement = connection.prepareStatement("update userinfo set name = ?, password = ? where id = ?");
-            preparedStatement.setString(1, user.getName());
-            preparedStatement.setString(2, user.getPassword());
-            preparedStatement.setLong(3, user.getId());
-
-            preparedStatement.executeUpdate();
-        } finally {
-            if(preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(connection != null) {
-                try {
-                    connection.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public Long add(User user) {
+        String sql = "insert into userinfo(name, password) values (?, ?)";
+        Object[] params = new Object[]{user.getName(), user.getPassword()};
+        return jdbcTemplate.insert(sql, params);
     }
 
-    public void delete(Long id) throws SQLException {
-        Connection connection = null;
-        PreparedStatement preparedStatement = null;//userinfo테이블에 name, password의 값이 들어오면 add한다.
 
-        try {
-            connection = dataSource.getConnection();
-
-            preparedStatement = connection.prepareStatement("delete from userinfo where id = ? ");
-            preparedStatement.setLong(1, id );
-
-            preparedStatement.executeUpdate();
-        } finally {
-            if(preparedStatement != null) {
-                try {
-                    preparedStatement.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-            if(connection != null) {
-                try {
-                    connection.close();
-                }
-                catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public void update(User user) {
+        String sql = "update userinfo set name = ?, password = ? where id = ?";
+        Object[] params = new Object[]{user.getName(), user.getPassword(), user.getId()};
+        jdbcTemplate.update(sql, params);
     }
 
-    public Long getLastInsertId(Connection connection) throws SQLException {
-        ResultSet resultSet = null;
-        Long id = null;
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("select last_insert_id()");//가장 최근에 삽입된 id를 가지고 온다.
-            resultSet = preparedStatement.executeQuery();
-
-            resultSet.next();
-            id = resultSet.getLong(1);
-        } finally {
-            if(resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return id;
+    public void delete(Long id) {
+        String sql = "delete from userinfo where id = ?";
+        Object[] params = new Object[]{id};
+        jdbcTemplate.update(sql, params);
     }
 
 //    private Connection getConnection() throws SQLException, ClassNotFoundException {

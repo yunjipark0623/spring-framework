@@ -14,14 +14,19 @@ public class DaoFactory {
     private String className;
     @Value("${db.url}")
     private String url;
-    @Value("${db.username}")
-    private String username;
     @Value("${db.password}")
     private String password;
+    @Value("${db.username}")
+    private String username;
 
     @Bean
     public UserDao userDao() {
-        return new UserDao(dataSource());
+        return new UserDao(jdbcContext());
+    }
+
+    @Bean
+    public JejuJdbcTemplate jdbcContext() {
+        return new JejuJdbcTemplate(dataSource());
     }
 
     @Bean
@@ -30,12 +35,11 @@ public class DaoFactory {
         try {
             dataSource.setDriverClass((Class<? extends Driver>) Class.forName(className));
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw  new RuntimeException(e);
         }
         dataSource.setUrl(url);
-        dataSource.setUsername(username);
         dataSource.setPassword(password);
-        
+        dataSource.setUsername(username);
         return dataSource;
     }
 }
