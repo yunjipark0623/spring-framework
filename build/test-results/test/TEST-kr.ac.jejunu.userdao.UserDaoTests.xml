@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="kr.ac.jejunu.userdao.UserDaoTests" tests="4" skipped="0" failures="0" errors="0" timestamp="2019-05-03T16:57:11" hostname="bag-yunjiui-MacBook-Pro.local" time="0.99">
+  <properties/>
+  <testcase name="testAdd" classname="kr.ac.jejunu.userdao.UserDaoTests" time="0.832"/>
+  <testcase name="testGet" classname="kr.ac.jejunu.userdao.UserDaoTests" time="0.039"/>
+  <testcase name="testDelete" classname="kr.ac.jejunu.userdao.UserDaoTests" time="0.064"/>
+  <testcase name="testUpdate" classname="kr.ac.jejunu.userdao.UserDaoTests" time="0.052"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
