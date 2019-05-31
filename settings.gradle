@@ -1,2 +1,6 @@
-rootProject.name = 'portal'
-
+pluginManagement {
+	repositories {
+		gradlePluginPortal()
+	}
+}
+rootProject.name = 'user'

@@ -355,7 +355,7 @@ public class UserDao {//추상화된 함수를 가지고 있으니까 class도 �
     }
 
 //    private Connection getConnection() throws SQLException, ClassNotFoundException {
-        //url, user, password등의 정보가 들어가 있으니까 private로 만들어 준다. 다른 db를 사용하려면 이 getConnection부분이 달라져야 한다. 매번 달라져야 하기때문에 무엇이 나올지 모른다. -> 추상화 한다. -> private를 public abstract로 바꾼다.
+    //url, user, password등의 정보가 들어가 있으니까 private로 만들어 준다. 다른 db를 사용하려면 이 getConnection부분이 달라져야 한다. 매번 달라져야 하기때문에 무엇이 나올지 모른다. -> 추상화 한다. -> private를 public abstract로 바꾼다.
 //        return connectionMaker.getConnection();
 //    }
     //jejuproductUserdao, hallaproductUserdao를 생성한다고 할 때(새로운 product클래스를 생성한다고 할 때) 똑같은 getConnection을 사용하니까 이것을 delicate해서 밖으로 빼버리자!! -> 하나의 클래스에서는 abstract를 했는데 다른 두개의 클래스에서 필요할 때에는 delicate해서 하나의 클래스로 뽑아냄

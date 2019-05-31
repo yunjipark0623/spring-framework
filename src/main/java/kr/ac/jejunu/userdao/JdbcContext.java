@@ -80,7 +80,7 @@ public class JdbcContext {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
-            }
+                }
         }
 
         return id;
@@ -105,7 +105,7 @@ public class JdbcContext {
                     connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
-            }
+                }
         }
     }
 
@@ -124,7 +124,7 @@ public class JdbcContext {
                     resultSet.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
-            }
+                }
 
         }
 

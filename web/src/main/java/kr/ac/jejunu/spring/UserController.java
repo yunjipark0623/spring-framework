@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @RequestMapping("/user")
-    public String model(User user){
+    public String model(User user) {
         return "user";
     }
 

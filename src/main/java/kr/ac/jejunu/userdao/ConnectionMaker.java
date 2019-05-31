@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public interface ConnectionMaker {
     Connection getConnection() throws SQLException, ClassNotFoundException;
-        //url, user, password등의 정보가 들어가 있으니까 private로 만들어 준다. 다른 db를 사용하려면 이 getConnection부분이 달라져야 한다. 매번 달라져야 하기때문에 무엇이 나올지 모른다. -> 추상화 한다. -> private를 public abstract로 바꾼다.
+    //url, user, password등의 정보가 들어가 있으니까 private로 만들어 준다. 다른 db를 사용하려면 이 getConnection부분이 달라져야 한다. 매번 달라져야 하기때문에 무엇이 나올지 모른다. -> 추상화 한다. -> private를 public abstract로 바꾼다.
 //        Class.forName("com.mysql.cj.jdbc.Driver");
 //        return DriverManager.getConnection("jdbc:mysql://172.18.102.128/jeju?serverTimezone=UTC",
 //                "portal", "portaljejunu");

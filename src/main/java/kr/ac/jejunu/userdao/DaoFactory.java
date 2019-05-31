@@ -35,7 +35,7 @@ public class DaoFactory {
         try {
             dataSource.setDriverClass((Class<? extends Driver>) Class.forName(className));
         } catch (ClassNotFoundException e) {
-            throw  new RuntimeException(e);
+            throw new RuntimeException(e);
         }
         dataSource.setUrl(url);
         dataSource.setPassword(password);
